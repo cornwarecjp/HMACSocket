@@ -24,7 +24,6 @@
 #include <strings.h>
 
 #include <unistd.h>
-
 #include <sys/socket.h>
 #include <netinet/in.h>
 
@@ -72,7 +71,8 @@ void listenOnPort(int port, void (*callback)(int))
 	int sockfd, newsockfd, clilen;
 	struct sockaddr_in serv_addr, cli_addr;
 	const int enable = 1;
-
+	pid_t pid;
+		
 	bzero((char *) &serv_addr, sizeof(serv_addr));
 
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -90,7 +90,7 @@ void listenOnPort(int port, void (*callback)(int))
 
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_addr.s_addr = INADDR_ANY;
-	serv_addr.sin_port = htons(PORTNUMBER);
+	serv_addr.sin_port = htons(port);
 
 	if (bind(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
 	{
@@ -104,7 +104,17 @@ void listenOnPort(int port, void (*callback)(int))
 	{
 		clilen = sizeof(cli_addr);
 		newsockfd = accept(sockfd, (struct sockaddr *)&cli_addr, &clilen);
-		callback(newsockfd);
+		pid = fork();
+		if(pid == 0)
+		{
+			close(sockfd);
+			callback(newsockfd);
+			exit(0);
+		}
+		else
+		{
+			close(newsockfd);
+		}
 	}
 }
 
