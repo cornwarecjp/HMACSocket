@@ -86,6 +86,7 @@ void readInitMessage(int fd, unsigned char *nonce, uint32_t *maxMessageLength)
 {
 	uint16_t hashLength_bigEndian;
 	uint32_t maxMessageLength_bigEndian;
+
 	readAll(fd, &hashLength_bigEndian, sizeof(hashLength_bigEndian));
 	if(ntohs(hashLength_bigEndian) != HMACLEN)
 	{
@@ -99,5 +100,45 @@ void readInitMessage(int fd, unsigned char *nonce, uint32_t *maxMessageLength)
 		*maxMessageLength = MAX_MESSAGE_SIZE;
 
 	readAll(fd, nonce, HMACLEN);
+}
+
+void writeChunkMessage(int fd, unsigned char *nonce, uint32_t dataLen, const unsigned char *data)
+{
+	struct __attribute__((__packed__))
+	{
+		uint32_t dataLength;
+		char HMAC[HMACLEN];
+		char data[MAX_MESSAGE_SIZE];
+	} message;
+	message.dataLength = htonl(dataLen);
+	//TODO: HMAC writing
+	memcpy(message.data, data, dataLen);
+
+	write(fd, &message, 4 + HMACLEN + dataLen);
+}
+
+void readChunkMessage(int fd, unsigned char *nonce, uint32_t *dataLen, unsigned char *buffer)
+{
+	uint32_t dataLength;
+	char HMAC[HMACLEN];
+
+	readAll(fd, &dataLength, sizeof(dataLength));
+	dataLength = ntohl(dataLength);
+	*dataLen = dataLength;
+	if(dataLength == 0)
+	{
+		//TODO: read error message instead
+	}
+	if(dataLength > MAX_MESSAGE_SIZE)
+	{
+		perror("Received too big data size\n");
+		exit(1);
+	}
+
+	readAll(fd, HMAC, sizeof(HMAC));
+
+	readAll(fd, buffer, dataLength);
+
+	//TODO: HMAC checking
 }
 

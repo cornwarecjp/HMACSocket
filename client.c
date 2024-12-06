@@ -34,6 +34,7 @@ void serve(int fd)
 {
 	uint32_t maxWriteMessageLength = 0;
 	char readNonce[HMACLEN], writeNonce[HMACLEN];
+	char buffer[MAX_MESSAGE_SIZE];
 
 	int serverfd = connectToPort("localhost", SERVERPORT);
 
@@ -42,6 +43,16 @@ void serve(int fd)
 	readInitMessage(serverfd, writeNonce, &maxWriteMessageLength);
 	printf("Max write message length = %d\n", maxWriteMessageLength);
 
+	while(1)
+	{
+		ssize_t dataLen = read(fd, buffer, maxWriteMessageLength);
+		if(dataLen < 0)
+			break;
+		if(dataLen == 0)
+			continue;
+
+		writeChunkMessage(serverfd, writeNonce, dataLen, buffer);
+	}
 
 	close(serverfd);
 	close(fd);

@@ -35,11 +35,20 @@ void serve(int fd)
 {
 	uint32_t maxWriteMessageLength = 0;
 	char readNonce[HMACLEN], writeNonce[HMACLEN];
+	char buffer[MAX_MESSAGE_SIZE];
+	uint32_t dataLength;
 
 	makeNonce(readNonce);
 	writeInitMessage(fd, readNonce);
 	readInitMessage(fd, writeNonce, &maxWriteMessageLength);
 	printf("Max write message length = %d\n", maxWriteMessageLength);
+
+	while(1)
+	{
+		readChunkMessage(fd, readNonce, &dataLength, buffer);
+		buffer[dataLength] = 0;
+		printf("Received: %s\n", buffer);
+	}
 	
 	close(fd);
 }
