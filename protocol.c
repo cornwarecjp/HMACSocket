@@ -28,32 +28,11 @@
 #include <arpa/inet.h>
 
 #include "protocol.h"
-#include "hmac.h"
 
+#include "hmac.h"
+#include "network.h"
 
 #define RANDOMSOURCE "/dev/urandom"
-
-
-void readAll(int fd, void *buffer, size_t count)
-{
-	ssize_t received = 0;
-	while(count)
-	{
-		received = read(fd, buffer, count);
-
-		if(received < 0)
-			exit(0);
-
-		/*
-		for(unsigned int i=0; i<received; i++)
-			printf("%02x", ((unsigned char *)buffer)[i]);
-		printf("\n");
-		*/
-
-		buffer += received;
-		count -= received;
-	}
-}
 
 
 void makeNonce(unsigned char *nonce)
@@ -80,7 +59,7 @@ void writeInitMessage(int fd, const unsigned char *nonce)
 	message.maxMessageLength = htonl(MAX_MESSAGE_SIZE);
 	memcpy(message.nonce, nonce, HMACLEN);
 
-	write(fd, &message, sizeof(message));
+	writeAll(fd, &message, sizeof(message));
 }
 
 void readInitMessage(int fd, unsigned char *nonce, uint32_t *maxMessageLength)
@@ -115,7 +94,7 @@ void writeChunkMessage(int fd, unsigned char *nonce, uint32_t dataLen, const uns
 	//TODO: HMAC writing
 	memcpy(message.data, data, dataLen);
 
-	write(fd, &message, 4 + HMACLEN + dataLen);
+	writeAll(fd, &message, 4 + HMACLEN + dataLen);
 }
 
 void readChunkMessage(int fd, unsigned char *nonce, uint32_t *dataLen, unsigned char *buffer)
@@ -186,7 +165,7 @@ void forwardData(int regularfd, int HMACfd)
 		{
 			uint32_t dataLength;
 			readChunkMessage(HMACfd, readNonce, &dataLength, buffer);
-			write(regularfd, buffer, dataLength);
+			writeAll(regularfd, buffer, dataLength);
 		}
 
 	}

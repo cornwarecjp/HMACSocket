@@ -120,3 +120,47 @@ int connectToPort(char *hostname, int port)
 	return sockfd;
 }
 
+
+void readAll(int fd, void *buffer, size_t count)
+{
+	ssize_t received = 0;
+	while(count)
+	{
+		received = read(fd, buffer, count);
+
+		if(received < 0)
+			exit(0);
+
+		/*
+		for(unsigned int i=0; i<received; i++)
+			printf("%02x", ((unsigned char *)buffer)[i]);
+		printf("\n");
+		*/
+
+		buffer += received;
+		count -= received;
+	}
+}
+
+
+void writeAll(int fd, const void *buffer, size_t count)
+{
+	ssize_t sent = 0;
+	while(count)
+	{
+		sent = write(fd, buffer, count);
+
+		if(sent < 0)
+			exit(0);
+
+		/*
+		for(unsigned int i=0; i<received; i++)
+			printf("%02x", ((unsigned char *)buffer)[i]);
+		printf("\n");
+		*/
+
+		buffer += sent;
+		count -= sent;
+	}
+}
+

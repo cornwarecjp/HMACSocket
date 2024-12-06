@@ -28,5 +28,8 @@ void listenOnPort(int port, void (*callback)(int));
 
 int connectToPort(char *hostname, int port);
 
+void readAll(int fd, void *buffer, size_t count);
+void writeAll(int fd, const void *buffer, size_t count);
+
 #endif
 
