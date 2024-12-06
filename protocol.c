@@ -91,8 +91,8 @@ void writeChunkMessage(int fd,
 	struct __attribute__((__packed__))
 	{
 		uint32_t dataLength;
-		char HMAC[HMACLEN];
-		char data[MAX_MESSAGE_SIZE];
+		unsigned char HMAC[HMACLEN];
+		unsigned char data[MAX_MESSAGE_SIZE];
 	} message;
 	message.dataLength = htonl(dataLen);
 	getMessageHMAC(key, keyLen, data, dataLen, nonce, message.HMAC);
@@ -109,7 +109,9 @@ void readChunkMessage(int fd,
 	const unsigned char *key, unsigned int keyLen)
 {
 	uint32_t dataLength;
-	char HMAC[HMACLEN];
+	unsigned char HMAC[HMACLEN];
+	unsigned char expectedHMAC[HMACLEN];
+	int HMACIsCorrect;
 
 	readAll(fd, &dataLength, sizeof(dataLength));
 	dataLength = ntohl(dataLength);
@@ -128,7 +130,17 @@ void readChunkMessage(int fd,
 
 	readAll(fd, buffer, dataLength);
 
-	//TODO: HMAC checking
+	getMessageHMAC(key, keyLen, buffer, dataLength, nonce, expectedHMAC);
+
+	HMACIsCorrect = 1;
+	for(unsigned int i=0; i<HMACLEN; i++)
+		HMACIsCorrect = (HMAC[i] == expectedHMAC[i]) && HMACIsCorrect;
+	if(!HMACIsCorrect)
+	{
+		perror("HMAC comparison failure\n");
+		exit(1);
+	}
+
 	//TODO: nonce increment
 }
 
