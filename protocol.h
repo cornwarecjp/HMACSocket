@@ -33,5 +33,7 @@ void readInitMessage(int fd, unsigned char *nonce, uint32_t *maxMessageLength);
 void writeChunkMessage(int fd, unsigned char *nonce, uint32_t dataLen, const unsigned char *buffer);
 void readChunkMessage(int fd, unsigned char *nonce, uint32_t *dataLen, unsigned char *buffer);
 
+void forwardData(int regularfd, int HMACfd);
+
 #endif
 

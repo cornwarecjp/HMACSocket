@@ -23,6 +23,7 @@
 #include <string.h>
 
 #include <unistd.h>
+#include <poll.h>
 
 #include <arpa/inet.h>
 
@@ -140,5 +141,54 @@ void readChunkMessage(int fd, unsigned char *nonce, uint32_t *dataLen, unsigned 
 	readAll(fd, buffer, dataLength);
 
 	//TODO: HMAC checking
+}
+
+void forwardData(int regularfd, int HMACfd)
+{
+	uint32_t maxWriteMessageLength = 0;
+	char readNonce[HMACLEN], writeNonce[HMACLEN];
+	struct pollfd pollList[2];
+
+	makeNonce(readNonce);
+	writeInitMessage(HMACfd, readNonce);
+	readInitMessage(HMACfd, writeNonce, &maxWriteMessageLength);
+	printf("Max write message length = %d\n", maxWriteMessageLength);
+
+	pollList[0].fd = regularfd;
+	pollList[1].fd = HMACfd;
+	pollList[0].events = POLLIN;
+	pollList[1].events = POLLIN;
+
+	while(1)
+	{
+		char buffer[MAX_MESSAGE_SIZE];
+
+		if(poll(pollList, 2, -1) < 0)
+		{
+			perror("poll error\n");
+			exit(1);
+		}
+
+		for(unsigned int i=0; i<2; i++)
+			if(pollList[i].revents & (POLLHUP | POLLERR | POLLNVAL))
+				break;
+
+		if(pollList[0].revents & POLLIN)
+		{
+			ssize_t dataLen = read(regularfd, buffer, maxWriteMessageLength);
+			if(dataLen < 0)
+				break;
+			if(dataLen > 0)
+				writeChunkMessage(HMACfd, writeNonce, dataLen, buffer);
+		}
+
+		if(pollList[1].revents & POLLIN)
+		{
+			uint32_t dataLength;
+			readChunkMessage(HMACfd, readNonce, &dataLength, buffer);
+			write(regularfd, buffer, dataLength);
+		}
+
+	}
 }
 

@@ -19,13 +19,9 @@
 */
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 #include <unistd.h>
-#include <poll.h>
 
-#include "hmac.h"
 #include "network.h"
 #include "protocol.h"
 
@@ -33,54 +29,8 @@
 
 void serve(int fd)
 {
-	uint32_t maxWriteMessageLength = 0;
-	char readNonce[HMACLEN], writeNonce[HMACLEN];
-	struct pollfd pollList[2];
-
 	int serverfd = connectToPort("localhost", SERVERPORT);
-
-	makeNonce(readNonce);
-	writeInitMessage(serverfd, readNonce);
-	readInitMessage(serverfd, writeNonce, &maxWriteMessageLength);
-	printf("Max write message length = %d\n", maxWriteMessageLength);
-
-	pollList[0].fd = fd;
-	pollList[1].fd = serverfd;
-	pollList[0].events = POLLIN;
-	pollList[1].events = POLLIN;
-
-	while(1)
-	{
-		char buffer[MAX_MESSAGE_SIZE];
-
-		if(poll(pollList, 2, -1) < 0)
-		{
-			perror("poll error\n");
-			exit(1);
-		}
-
-		for(unsigned int i=0; i<2; i++)
-			if(pollList[i].revents & (POLLHUP | POLLERR | POLLNVAL))
-				break;
-
-		if(pollList[0].revents & POLLIN)
-		{
-			ssize_t dataLen = read(fd, buffer, maxWriteMessageLength);
-			if(dataLen < 0)
-				break;
-			if(dataLen > 0)
-				writeChunkMessage(serverfd, writeNonce, dataLen, buffer);
-		}
-
-		if(pollList[1].revents & POLLIN)
-		{
-			uint32_t dataLength;
-			readChunkMessage(serverfd, readNonce, &dataLength, buffer);
-			write(fd, buffer, dataLength);
-		}
-
-	}
-
+	forwardData(fd, serverfd);
 	close(serverfd);
 	close(fd);
 }
