@@ -26,11 +26,13 @@
 #include "protocol.h"
 
 
+#define KEY "foobar"
+#define KEYLEN 6
 
 void serve(int fd)
 {
 	int serverfd = connectToPort("localhost", SERVERPORT);
-	forwardData(fd, serverfd);
+	forwardData(fd, serverfd, KEY, KEYLEN);
 	close(serverfd);
 	close(fd);
 }

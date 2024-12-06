@@ -82,7 +82,10 @@ void readInitMessage(int fd, unsigned char *nonce, uint32_t *maxMessageLength)
 	readAll(fd, nonce, HMACLEN);
 }
 
-void writeChunkMessage(int fd, unsigned char *nonce, uint32_t dataLen, const unsigned char *data)
+void writeChunkMessage(int fd,
+	unsigned char *nonce,
+	uint32_t dataLen, const unsigned char *data,
+	const unsigned char *key, unsigned int keyLen)
 {
 	struct __attribute__((__packed__))
 	{
@@ -97,7 +100,10 @@ void writeChunkMessage(int fd, unsigned char *nonce, uint32_t dataLen, const uns
 	writeAll(fd, &message, 4 + HMACLEN + dataLen);
 }
 
-void readChunkMessage(int fd, unsigned char *nonce, uint32_t *dataLen, unsigned char *buffer)
+void readChunkMessage(int fd,
+	unsigned char *nonce,
+	uint32_t *dataLen, unsigned char *buffer,
+	const unsigned char *key, unsigned int keyLen)
 {
 	uint32_t dataLength;
 	char HMAC[HMACLEN];
@@ -122,7 +128,7 @@ void readChunkMessage(int fd, unsigned char *nonce, uint32_t *dataLen, unsigned 
 	//TODO: HMAC checking
 }
 
-void forwardData(int regularfd, int HMACfd)
+void forwardData(int regularfd, int HMACfd, const unsigned char *key, unsigned int keyLen)
 {
 	uint32_t maxWriteMessageLength = 0;
 	char readNonce[HMACLEN], writeNonce[HMACLEN];
@@ -158,13 +164,13 @@ void forwardData(int regularfd, int HMACfd)
 			if(dataLen < 0)
 				break;
 			if(dataLen > 0)
-				writeChunkMessage(HMACfd, writeNonce, dataLen, buffer);
+				writeChunkMessage(HMACfd, writeNonce, dataLen, buffer, key, keyLen);
 		}
 
 		if(pollList[1].revents & POLLIN)
 		{
 			uint32_t dataLength;
-			readChunkMessage(HMACfd, readNonce, &dataLength, buffer);
+			readChunkMessage(HMACfd, readNonce, &dataLength, buffer, key, keyLen);
 			writeAll(regularfd, buffer, dataLength);
 		}
 
