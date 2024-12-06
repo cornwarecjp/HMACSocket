@@ -19,13 +19,9 @@
 */
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <strings.h>
 
 #include <unistd.h>
 
-#include "hmac.h"
 #include "network.h"
 #include "protocol.h"
 
@@ -33,25 +29,9 @@
 
 void serve(int fd)
 {
-	uint32_t maxWriteMessageLength = 0;
-	char readNonce[HMACLEN], writeNonce[HMACLEN];
-	char buffer[MAX_MESSAGE_SIZE];
-	uint32_t dataLength;
-
-	makeNonce(readNonce);
-	writeInitMessage(fd, readNonce);
-	readInitMessage(fd, writeNonce, &maxWriteMessageLength);
-	printf("Max write message length = %d\n", maxWriteMessageLength);
-
-	while(1)
-	{
-		readChunkMessage(fd, readNonce, &dataLength, buffer);
-		buffer[dataLength] = 0;
-		printf("Received: %s\n", buffer);
-
-		writeChunkMessage(fd, writeNonce, dataLength, buffer);
-	}
-	
+	int serverfd = connectToPort("localhost", 5003);
+	forwardData(serverfd, fd);
+	close(serverfd);
 	close(fd);
 }
 
