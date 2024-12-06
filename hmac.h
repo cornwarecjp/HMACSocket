@@ -23,9 +23,14 @@
 
 #define HMACLEN 32
 
-unsigned char *HMAC_SHA256(	const void *key, unsigned int keylen,
+void HMAC_SHA256(const void *key, unsigned int keylen,
 	const unsigned char *data, unsigned int datalen,
 	unsigned char *result, unsigned int *resultlen
+	);
+
+void getFirstMessageNonce(const void *key, unsigned int keylen,
+	const unsigned char *initNonce,
+	unsigned char *firstMessageNonce
 	);
 
 #endif

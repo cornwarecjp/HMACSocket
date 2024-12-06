@@ -20,15 +20,31 @@
 
 #include <openssl/evp.h>
 #include <openssl/hmac.h>
+#include <openssl/sha.h>
 
 #include "hmac.h"
 
-unsigned char *HMAC_SHA256(
+void HMAC_SHA256(
 	const void *key, unsigned int keylen,
 	const unsigned char *data, unsigned int datalen,
 	unsigned char *result, unsigned int *resultlen
 	)
 {
-	return HMAC(EVP_sha256(), key, keylen, data, datalen, result, resultlen);
+	HMAC(EVP_sha256(), key, keylen, data, datalen, result, resultlen);
+}
+
+void getFirstMessageNonce(const void *key, unsigned int keylen,
+	const unsigned char *initNonce,
+	unsigned char *firstMessageNonce
+	)
+{
+	unsigned int len;
+
+	EVP_MD_CTX *c = EVP_MD_CTX_new();
+	EVP_DigestInit_ex2(c, EVP_sha256(), NULL);
+	EVP_DigestUpdate(c, initNonce, HMACLEN);
+	EVP_DigestUpdate(c, key, keylen);
+	EVP_DigestFinal_ex(c, firstMessageNonce, &len);
+	EVP_MD_CTX_free(c);
 }
 

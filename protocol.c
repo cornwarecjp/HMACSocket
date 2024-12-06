@@ -137,7 +137,9 @@ void forwardData(int regularfd, int HMACfd, const unsigned char *key, unsigned i
 	makeNonce(readNonce);
 	writeInitMessage(HMACfd, readNonce);
 	readInitMessage(HMACfd, writeNonce, &maxWriteMessageLength);
-	printf("Max write message length = %d\n", maxWriteMessageLength);
+
+	getFirstMessageNonce(key, keyLen, readNonce, readNonce);
+	getFirstMessageNonce(key, keyLen, writeNonce, writeNonce);
 
 	pollList[0].fd = regularfd;
 	pollList[1].fd = HMACfd;
