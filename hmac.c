@@ -17,20 +17,23 @@
     You should have received a copy of the GNU General Public License
     along with HMACSocket. If not, see <http://www.gnu.org/licenses/>.
 */
+#include <string.h>
 
 #include <openssl/evp.h>
 #include <openssl/hmac.h>
 #include <openssl/sha.h>
 
 #include "hmac.h"
+#include "settings.h"
 
 void HMAC_SHA256(
 	const void *key, unsigned int keylen,
 	const unsigned char *data, unsigned int datalen,
-	unsigned char *result, unsigned int *resultlen
+	unsigned char *result
 	)
 {
-	HMAC(EVP_sha256(), key, keylen, data, datalen, result, resultlen);
+	unsigned int len;
+	HMAC(EVP_sha256(), key, keylen, data, datalen, result, &len);
 }
 
 void getFirstMessageNonce(const void *key, unsigned int keylen,
@@ -46,5 +49,20 @@ void getFirstMessageNonce(const void *key, unsigned int keylen,
 	EVP_DigestUpdate(c, key, keylen);
 	EVP_DigestFinal_ex(c, firstMessageNonce, &len);
 	EVP_MD_CTX_free(c);
+}
+
+void getMessageHMAC(const void *key, unsigned int keylen,
+	const unsigned char *data, unsigned int datalen,
+	const unsigned char *nonce,
+	unsigned char *result
+	)
+{
+	char buffer[MAX_MESSAGE_SIZE + HMACLEN];
+	unsigned int len;
+
+	memcpy(buffer, data, datalen);
+	memcpy(buffer+datalen, nonce, HMACLEN);
+
+	HMAC(EVP_sha256(), key, keylen, buffer, datalen+HMACLEN, result, &len);
 }
 

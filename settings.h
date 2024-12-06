@@ -1,5 +1,5 @@
 /*
-    hmac.h
+    settings.h
     Copyright (C) 2024 by the HMACSocket developers
 
     This file is part of HMACSocket.
@@ -18,21 +18,10 @@
     along with HMACSocket. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef HMAC_H
-#define HMAC_H
+#ifndef SETTINGS_H
+#define SETTINGS_H
 
-#define HMACLEN 32
-
-void getFirstMessageNonce(const void *key, unsigned int keylen,
-	const unsigned char *initNonce,
-	unsigned char *firstMessageNonce
-	);
-
-void getMessageHMAC(const void *key, unsigned int keylen,
-	const unsigned char *data, unsigned int datalen,
-	const unsigned char *nonce,
-	unsigned char *result
-	);
+#define MAX_MESSAGE_SIZE 1048576 //1 MiB
 
 #endif
 

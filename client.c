@@ -40,24 +40,6 @@ void serve(int fd)
 
 int main(int argc, char **argv)
 {
-	/*
-	unsigned char *key = "key";
-	unsigned char *data = "The quick brown fox jumps over the lazy dog";
-	unsigned char result[HMACLEN];
-	unsigned int resultlen = 0;
-	
-	HMAC_SHA256(
-		key, strlen(key),
-		data, strlen(data),
-		result, &resultlen
-		);
-
-	for(unsigned int i=0; i < resultlen; i++)
-		printf("%02x", result[i]);
-
-	printf("\n");
-	*/
-
 	listenOnPort(CLIENTPORT, serve);
 
 	return 0;

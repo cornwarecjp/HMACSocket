@@ -31,6 +31,7 @@
 
 #include "hmac.h"
 #include "network.h"
+#include "settings.h"
 
 #define RANDOMSOURCE "/dev/urandom"
 
@@ -94,10 +95,12 @@ void writeChunkMessage(int fd,
 		char data[MAX_MESSAGE_SIZE];
 	} message;
 	message.dataLength = htonl(dataLen);
-	//TODO: HMAC writing
+	getMessageHMAC(key, keyLen, data, dataLen, nonce, message.HMAC);
 	memcpy(message.data, data, dataLen);
 
 	writeAll(fd, &message, 4 + HMACLEN + dataLen);
+	
+	//TODO: nonce increment
 }
 
 void readChunkMessage(int fd,
@@ -126,6 +129,7 @@ void readChunkMessage(int fd,
 	readAll(fd, buffer, dataLength);
 
 	//TODO: HMAC checking
+	//TODO: nonce increment
 }
 
 void forwardData(int regularfd, int HMACfd, const unsigned char *key, unsigned int keyLen)

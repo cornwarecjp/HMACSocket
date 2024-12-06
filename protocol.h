@@ -23,7 +23,6 @@
 
 #include <stdint.h>
 
-#define MAX_MESSAGE_SIZE 1048576 //1 MiB
 
 void makeNonce(unsigned char *nonce);
 
