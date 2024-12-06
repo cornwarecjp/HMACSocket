@@ -76,8 +76,7 @@ void serve(int fd)
 		{
 			uint32_t dataLength;
 			readChunkMessage(serverfd, readNonce, &dataLength, buffer);
-			buffer[dataLength] = 0;
-			printf("Received back: %s\n", buffer);
+			write(fd, buffer, dataLength);
 		}
 
 	}
