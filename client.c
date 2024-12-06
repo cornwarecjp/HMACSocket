@@ -26,11 +26,18 @@
 
 #include "hmac.h"
 #include "network.h"
+#include "protocol.h"
+
 
 
 void serve(int fd)
 {
+	unsigned char nonce[HMACLEN];
+	makeNonce(nonce);
+
 	int serverfd = connectToPort("localhost", SERVERPORT);
+	writeInitMessage(serverfd, nonce);
+
 	write(serverfd, "quit", 4);
 	close(serverfd);
 

@@ -25,7 +25,9 @@
 
 #include <unistd.h>
 
+#include "hmac.h"
 #include "network.h"
+#include "protocol.h"
 
 
 
@@ -33,6 +35,11 @@ void serve(int fd)
 {
 	char buffer[256];
 	int  n;
+
+	uint32_t maxWriteMessageLength = 0;
+	char writeNonce[HMACLEN];
+	readInitMessage(fd, writeNonce, &maxWriteMessageLength);
+	printf("Max write message length = %d\n", maxWriteMessageLength);
 
 	while(1)
 	{
