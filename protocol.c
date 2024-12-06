@@ -48,6 +48,16 @@ void makeNonce(unsigned char *nonce)
 }
 
 
+void incrementNonce(unsigned char *nonce)
+{
+	for(int i = HMACLEN-1; i >= 0; i--)
+	{
+		nonce[i]++;
+		if(nonce[i]) break;
+	}
+}
+
+
 void writeInitMessage(int fd, const unsigned char *nonce)
 {
 	struct __attribute__((__packed__))
@@ -100,7 +110,7 @@ void writeChunkMessage(int fd,
 
 	writeAll(fd, &message, 4 + HMACLEN + dataLen);
 	
-	//TODO: nonce increment
+	incrementNonce(nonce);
 }
 
 void readChunkMessage(int fd,
@@ -141,7 +151,7 @@ void readChunkMessage(int fd,
 		exit(1);
 	}
 
-	//TODO: nonce increment
+	incrementNonce(nonce);
 }
 
 void forwardData(int regularfd, int HMACfd, const unsigned char *key, unsigned int keyLen)
