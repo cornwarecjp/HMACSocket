@@ -33,38 +33,13 @@
 
 void serve(int fd)
 {
-	char buffer[256];
-	int  n;
-
 	uint32_t maxWriteMessageLength = 0;
-	char writeNonce[HMACLEN];
+	char readNonce[HMACLEN], writeNonce[HMACLEN];
+
+	makeNonce(readNonce);
+	writeInitMessage(fd, readNonce);
 	readInitMessage(fd, writeNonce, &maxWriteMessageLength);
 	printf("Max write message length = %d\n", maxWriteMessageLength);
-
-	while(1)
-	{
-		bzero(buffer,256);
-		n = read(fd, buffer, 255);
-
-		if(n < 0)
-		{
-			perror("ERROR in reading from socket");
-			exit(1);
-		}
-
-		printf("client said: %s \n", buffer);
-
-		n = write(fd, buffer, strlen(buffer));
-
-		if(n < 0)
-		{
-			perror("ERROR in writing to socket");
-			exit(1);
-		}
-
-		if(!memcmp(buffer, "quit", 4))
-			break;
-	}
 	
 	close(fd);
 }

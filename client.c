@@ -32,15 +32,18 @@
 
 void serve(int fd)
 {
-	unsigned char nonce[HMACLEN];
-	makeNonce(nonce);
+	uint32_t maxWriteMessageLength = 0;
+	char readNonce[HMACLEN], writeNonce[HMACLEN];
 
 	int serverfd = connectToPort("localhost", SERVERPORT);
-	writeInitMessage(serverfd, nonce);
 
-	write(serverfd, "quit", 4);
+	makeNonce(readNonce);
+	writeInitMessage(serverfd, readNonce);
+	readInitMessage(serverfd, writeNonce, &maxWriteMessageLength);
+	printf("Max write message length = %d\n", maxWriteMessageLength);
+
+
 	close(serverfd);
-
 	close(fd);
 }
 
