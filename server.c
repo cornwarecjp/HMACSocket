@@ -48,6 +48,8 @@ void serve(int fd)
 		readChunkMessage(fd, readNonce, &dataLength, buffer);
 		buffer[dataLength] = 0;
 		printf("Received: %s\n", buffer);
+
+		writeChunkMessage(fd, writeNonce, dataLength, buffer);
 	}
 	
 	close(fd);
