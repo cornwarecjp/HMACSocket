@@ -36,6 +36,11 @@ int parse_opt(int key, char *arg, struct argp_state *state)
 	case 'k':
 		{
 			FILE *keyFile = fopen(arg, "r");
+			if(keyFile == NULL)
+			{
+				perror("Unable to open the key file");
+				exit(1);
+			}
 
 			fseek(keyFile, 0, SEEK_END); 
 			arguments->keyLength = ftell(keyFile);
