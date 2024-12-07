@@ -22,6 +22,7 @@
 
 #include <unistd.h>
 
+#include "args.h"
 #include "network.h"
 #include "protocol.h"
 
@@ -40,6 +41,8 @@ void serve(int fd)
 
 int main(int argc, char **argv)
 {
+	struct arguments args = pargseArgs(argc, argv);
+
 	listenOnPort(SERVERPORT, serve);
 	return 0;
 }

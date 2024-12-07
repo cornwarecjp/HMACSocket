@@ -1,5 +1,5 @@
 /*
-    client.c
+    args.h
     Copyright (C) 2024 by the HMACSocket developers
 
     This file is part of HMACSocket.
@@ -18,33 +18,20 @@
     along with HMACSocket. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <stdio.h>
+#ifndef ARGS_H
+#define ARGS_H
 
-#include <unistd.h>
+struct arguments {
+    char *keyFile;
+    
+    char *listenHost;
+    int listenPort;
 
-#include "args.h"
-#include "network.h"
-#include "protocol.h"
+    char *connectHost;
+    int connectPort;
+};
 
+struct arguments pargseArgs(int argc, char **argv);
 
-#define KEY "foobar"
-#define KEYLEN 6
-
-void serve(int fd)
-{
-	int serverfd = connectToPort("localhost", SERVERPORT);
-	forwardData(fd, serverfd, KEY, KEYLEN);
-	close(serverfd);
-	close(fd);
-}
-
-
-int main(int argc, char **argv)
-{
-	struct arguments args = pargseArgs(argc, argv);
-
-	listenOnPort(CLIENTPORT, serve);
-
-	return 0;
-}
+#endif
 
