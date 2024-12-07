@@ -27,14 +27,11 @@
 #include "protocol.h"
 
 
-#define KEY "foobar"
-#define KEYLEN 6
-
 void serve(int fd, void *callbackData)
 {
 	struct arguments *args = callbackData;
 	int serverfd = connectToPort(args->connectHost, args->connectPort);
-	forwardData(fd, serverfd, KEY, KEYLEN);
+	forwardData(fd, serverfd, args->key, args->keyLength);
 	close(serverfd);
 	close(fd);
 }
@@ -45,7 +42,6 @@ int main(int argc, char **argv)
 	struct arguments args = pargseArgs(argc, argv);
 
 	listenOnPort(args.listenPort, serve, &args);
-
 	return 0;
 }
 

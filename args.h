@@ -22,7 +22,8 @@
 #define ARGS_H
 
 struct arguments {
-    char *keyFile;
+    char *key;
+    unsigned int keyLength;
     
     char *listenHost;
     int listenPort;

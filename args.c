@@ -34,7 +34,18 @@ int parse_opt(int key, char *arg, struct argp_state *state)
 	switch (key)
 	{
 	case 'k':
-		arguments->keyFile = arg;
+		{
+			FILE *keyFile = fopen(arg, "r");
+
+			fseek(keyFile, 0, SEEK_END); 
+			arguments->keyLength = ftell(keyFile);
+			fseek(keyFile, 0, SEEK_SET); 
+
+			arguments->key = malloc(arguments->keyLength);
+			fread(arguments->key, arguments->keyLength, 1, keyFile);
+
+			fclose(keyFile);
+		}
 		break;
 	case 'l':
 		{
@@ -68,7 +79,7 @@ int parse_opt(int key, char *arg, struct argp_state *state)
 		}
 		break;
 	case ARGP_KEY_END:
-		if(arguments->keyFile == NULL)
+		if(arguments->key == NULL)
 		{
 			perror("No key file was specified");
 			exit(1);
@@ -99,25 +110,15 @@ struct arguments pargseArgs(int argc, char **argv)
 		{ "connect", 'c', "host:port", 0, "Port to connect to"},
 		{ 0 }
 	};
-	struct argp argp = { options, parse_opt };
+	struct argp argp = {options, parse_opt};
 
-	ret.keyFile = NULL;
+	ret.key = NULL;
+	ret.keyLength = 0;
 	ret.listenHost = NULL;
 	ret.listenPort = -1;
 	ret.connectHost = NULL;
 	ret.connectPort = -1;
 	argp_parse (&argp, argc, argv, 0, 0, &ret);
-
-	if(ret.keyFile)
-		printf("Key file: %s\n", ret.keyFile);
-
-	if(ret.listenHost)
-		printf("Listen host: %s\n", ret.listenHost);
-	printf("Listen port: %d\n", ret.listenPort);
-
-	if(ret.connectHost)
-		printf("Connect host: %s\n", ret.connectHost);
-	printf("Connect port: %d\n", ret.connectPort);
 
 	return ret;
 }
