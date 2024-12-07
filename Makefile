@@ -9,6 +9,6 @@ clean:
 hmacsocketclient: client.o hmac.o network.o protocol.o args.o
 	gcc -o hmacsocketclient client.o hmac.o network.o protocol.o args.o -lcrypto
 
-hmacsocketserver: server.o hmac.o network.o protocol.o
+hmacsocketserver: server.o hmac.o network.o protocol.o args.o
 	gcc -o hmacsocketserver server.o hmac.o network.o protocol.o args.o -lcrypto
 
