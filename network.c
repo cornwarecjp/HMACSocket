@@ -33,7 +33,7 @@
 
 
 
-void listenOnPort(int port, void (*callback)(int))
+void listenOnPort(int port, void (*callback)(int, void *), void *callbackData)
 {
 	int sockfd, newsockfd, clilen;
 	struct sockaddr_in serv_addr, cli_addr;
@@ -75,7 +75,7 @@ void listenOnPort(int port, void (*callback)(int))
 		if(pid == 0)
 		{
 			close(sockfd);
-			callback(newsockfd);
+			callback(newsockfd, callbackData);
 			exit(0);
 		}
 		else

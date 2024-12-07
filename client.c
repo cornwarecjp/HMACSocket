@@ -30,9 +30,10 @@
 #define KEY "foobar"
 #define KEYLEN 6
 
-void serve(int fd)
+void serve(int fd, void *callbackData)
 {
-	int serverfd = connectToPort("localhost", SERVERPORT);
+	struct arguments *args = callbackData;
+	int serverfd = connectToPort(args->connectHost, args->connectPort);
 	forwardData(fd, serverfd, KEY, KEYLEN);
 	close(serverfd);
 	close(fd);
@@ -43,7 +44,7 @@ int main(int argc, char **argv)
 {
 	struct arguments args = pargseArgs(argc, argv);
 
-	listenOnPort(CLIENTPORT, serve);
+	listenOnPort(args.listenPort, serve, &args);
 
 	return 0;
 }

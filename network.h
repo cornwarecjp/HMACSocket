@@ -21,10 +21,7 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 
-#define SERVERPORT 5001
-#define CLIENTPORT 5002
-
-void listenOnPort(int port, void (*callback)(int));
+void listenOnPort(int port, void (*callback)(int, void *), void *callbackData);
 
 int connectToPort(char *hostname, int port);
 
