@@ -21,7 +21,7 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 
-void listenOnPort(int port, void (*callback)(int, void *), void *callbackData);
+void listenOnPort(char *hostname, int port, void (*callback)(int, void *), void *callbackData);
 
 int connectToPort(char *hostname, int port);
 

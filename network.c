@@ -33,7 +33,7 @@
 
 
 
-void listenOnPort(int port, void (*callback)(int, void *), void *callbackData)
+void listenOnPort(char *hostname, int port, void (*callback)(int, void *), void *callbackData)
 {
 	int sockfd, newsockfd, clilen;
 	struct sockaddr_in serv_addr, cli_addr;
@@ -56,10 +56,18 @@ void listenOnPort(int port, void (*callback)(int, void *), void *callbackData)
 	}
 
 	serv_addr.sin_family = AF_INET;
-	serv_addr.sin_addr.s_addr = INADDR_ANY;
 	serv_addr.sin_port = htons(port);
+	if(hostname)
+	{
+		struct hostent *server = gethostbyname(hostname);
+		serv_addr.sin_addr = *(struct in_addr *) server->h_addr;
+	}
+	else
+	{
+		serv_addr.sin_addr.s_addr = INADDR_ANY;
+	}
 
-	if (bind(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
+	if(bind(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
 	{
 		perror("ERROR on binding\n");
 		exit(1);

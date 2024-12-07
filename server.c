@@ -41,7 +41,7 @@ int main(int argc, char **argv)
 {
 	struct arguments args = pargseArgs(argc, argv);
 
-	listenOnPort(args.listenPort, serve, &args);
+	listenOnPort(args.listenHost, args.listenPort, serve, &args);
 	return 0;
 }
 
