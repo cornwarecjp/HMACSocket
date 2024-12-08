@@ -86,10 +86,10 @@ This has the following structure:
 * 1 byte: **LE** The length of the error message, in bytes
 * LE bytes: **EM**: The error message
 
-The correct HMAC for the error message is defined in the same way as for Chunk
+The correct HMAC for the Error message is defined in the same way as for Chunk
 messages.
-Error messages also increment `i` in the same way as chunk messages, so that,
-after two chunk messages and three error messages, `i` has increased by five.
+Error messages also increment `i` in the same way as Chunk messages, so that,
+after two Chunk messages and three Error messages, `i` has increased by five.
 
 The transmitting side
 * MUST set LD to zero.
