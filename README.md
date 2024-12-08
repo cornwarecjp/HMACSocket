@@ -1,4 +1,4 @@
-#HMACSocket
+# HMACSocket
 
 A TCP socket forwarding tool that adds HMAC-based authentication.
 
@@ -6,7 +6,7 @@ It is intended to minimize CPU overhead, compared to e.g. SSH port forwarding,
 for use cases where authentication is needed, but encryption is not.
 
 
-#Compiling
+# Compiling
 First install the dependencies:
 
 * gcc
@@ -22,7 +22,7 @@ apt install build-essential libssl-dev
 Then, to compile, just run `make`.
 
 
-#Usage
+# Usage
 
 First, generate a file containing the shared secret, e.g. with:
 
@@ -77,7 +77,7 @@ Now, processes can connect to the HMACSocket client's listen port, in the same
 way as they would normally connect to the to-be-forwarded port.
 
 
-#Usage example
+# Usage example
 
 In this example, a to-be-forwarded service is reachable only locally on host
 `serverhost`, on TCP port 5000.
@@ -103,7 +103,7 @@ Now, on `clienthost`, processes can connect to TCP port 5002; this will be
 forwarded to the service on TCP port 5000 on `serverhost`.
 
 
-#Security considerations
+# Security considerations
 For the authentication to be effective, there must be no way for an attacker to
 work around it.
 Therefore:
@@ -119,7 +119,7 @@ Therefore:
 Also read [doc/vulnerabilities.md](doc/vulnerabilities.md).
 
 
-#Implementation details
+# Implementation details
 The protocol between `hmacsocketclient` and `hmacsocketserver` is documented in
 [doc/protocol.md](doc/protocol.md).
 
@@ -132,7 +132,7 @@ Therefore, on start-up of these programs, errors in the `<connectHost>` and
 once you try to establish connections.
 
 
-#License
+# License
 
 GPL v3. See the file `LICENSE`.
 

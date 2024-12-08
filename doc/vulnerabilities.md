@@ -1,9 +1,9 @@
-#Known vulnerabilities of HMACSocket
+# Known vulnerabilities of HMACSocket
 
 When using the current version of HMACSocket, you should be aware of the
 following:
 
-#Denial of Service
+# Denial of Service
 No Denial of Service protection has been implemented.
 
 An attacker without access to the secret can still connect to the HMACSocket

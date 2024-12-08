@@ -1,4 +1,4 @@
-#hmacsocket protocol
+# HMACSocket protocol
 
 Prior to connecting, client and server must be configured to use the same
 secret key and hash function.
@@ -11,7 +11,7 @@ Chunk messages and error messages.
 All integers are big endian.
 
 
-#Init message
+# Init message
 
 This has the following structure:
 
@@ -33,7 +33,7 @@ The receiving side
   the output of the hash function it uses.
 
 
-#Chunk message
+# Chunk message
 
 This has the following structure:
 
@@ -75,7 +75,7 @@ The receiving side, in case H is not set to the correct HMAC for the chunk:
 * SHOULD stop with an error.
 
 
-#Error message
+# Error message
 
 Error messages can be distinguished from Chunk messages as they have an LD value
 of zero.
