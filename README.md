@@ -116,6 +116,12 @@ Therefore:
   You should therefore (nearly?) always specify `<listenHost>` on its
   commandline, even though the program allows you to omit this.
 
+By design, HMACSocket does not provide encryption.
+This limits its use to situations where
+* An attacker cannot eavesdrop
+* It is OK if an attacker gets to know the transfered data
+* The transfered data is already encrypted through some other mechanism
+
 Also read [doc/vulnerabilities.md](doc/vulnerabilities.md).
 
 
