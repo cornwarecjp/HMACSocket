@@ -11,7 +11,7 @@ First install the dependencies:
 
 * gcc
 * make
-* OpenSSL' libcrypto and its development files
+* OpenSSL's libcrypto and its development files
 
 For instance, on Debian, this should be sufficient (though this is untested):
 
