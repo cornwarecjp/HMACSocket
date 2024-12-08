@@ -21,13 +21,35 @@
 #ifndef HMAC_H
 #define HMAC_H
 
+//The length of HMAC values, in bytes (32 bytes for SHA256).
 #define HMACLEN 32
 
+/*
+Calculate the nonce to be used for the first Chunk or Error message.
+In the documentation, this is H(N|K).
+
+key, keylen:       The secret key (K in the documentation).
+initNonce:         The nonce value in the Init message (N in the documentation).
+                   Must be HMACLEN bytes.
+firstMessageNonce: The location where the output gets written.
+                   Must be HMACLEN bytes.
+*/
 void getFirstMessageNonce(const void *key, unsigned int keylen,
 	const unsigned char *initNonce,
 	unsigned char *firstMessageNonce
 	);
 
+/*
+Calculate the HMAC for a Chunk or Error message.
+
+key, keylen:       The secret key (K in the documentation).
+data, datalen:     The data (D in the documentation).
+                   Must be at most MAX_MESSAGE_SIZE (settings.h) bytes.
+nonce:             The nonce for this message (CN(i) in the documentation).
+                   Must be HMACLEN bytes.
+result:            The location where the output gets written.
+                   Must be HMACLEN bytes.
+*/
 void getMessageHMAC(const void *key, unsigned int keylen,
 	const unsigned char *data, unsigned int datalen,
 	const unsigned char *nonce,

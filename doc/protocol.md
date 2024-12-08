@@ -45,7 +45,7 @@ The correct HMAC for the chunk is defined as `HMAC(K, D | CN(i))`, where
 
 * `HMAC` is the HMAC function based on the hash function being used.
 * `K` is the secret key being used.
-* `CN(i) = H(N,K) + i` is the nonce for this chunk:
+* `CN(i) = H(N|K) + i` is the nonce for this chunk:
   - `N` is the nonce value, as in the init message received by the transmitter of
     the chunk message.
   - `H` is the hash function being used.

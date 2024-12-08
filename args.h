@@ -22,16 +22,22 @@
 #define ARGS_H
 
 struct arguments {
+	//The secret key (this is the key itself, not the filename):
     char *key;
     unsigned int keyLength;
-    
+
+	//The listen host (or NULL if not specified) and port:    
     char *listenHost;
     int listenPort;
 
+	//The connect host and port:
     char *connectHost;
     int connectPort;
 };
 
+/*
+Parse commandline arguments and return the values.
+*/
 struct arguments pargseArgs(int argc, char **argv);
 
 #endif
