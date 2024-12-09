@@ -22,6 +22,8 @@
 #define SETTINGS_H
 
 #define MAX_MESSAGE_SIZE 1048576 //1 MiB
+#define CONNECTIONQUEUELEN 10
+#define RANDOMSOURCE "/dev/urandom"
 
 #endif
 

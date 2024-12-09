@@ -28,8 +28,7 @@
 #include <netinet/in.h>
 
 #include "network.h"
-
-#define CONNECTIONQUEUELEN 10
+#include "settings.h"
 
 
 

@@ -34,7 +34,6 @@
 #include "network.h"
 #include "settings.h"
 
-#define RANDOMSOURCE "/dev/urandom"
 
 
 /*
