@@ -173,6 +173,29 @@ class TestServer(unittest.TestCase):
 			regularSocket.close()
 
 
+	def test_respectsDataLen(self):
+		maxDataLen = 100
+		try:
+			HMACSocket, regularSocket, protocol = self.setupSocketPair(
+				maxDataLen=maxDataLen, nonce=b'A'*HASHLEN)
+
+			sentData = b'Foobar'*1000
+			writeAll(regularSocket, sentData)
+
+			receivedData = b''
+			maxChunkSize = 0
+			while len(receivedData) < len(sentData):
+				chunk = protocol.readChunk()
+				maxChunkSize = max(maxChunkSize, len(chunk))
+				receivedData += chunk
+
+			self.assertEqual(receivedData, sentData)
+			self.assertEqual(maxChunkSize, maxDataLen)
+		finally:
+			HMACSocket.close()
+			regularSocket.close()
+
+
 	def test_rejectsIncorrectHMAC(self):
 		try:
 			HMACSocket, regularSocket, protocol = self.setupSocketPair(
