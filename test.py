@@ -46,33 +46,47 @@ incrementNonce = lambda nonce: (int.from_bytes(nonce, byteorder='big') + 1).to_b
 
 
 class HMACProtocol:
-	def __init__(self, fd):
+	def __init__(self, fd, key):
 		self.fd = fd
+		self.key = key
+		self.readNonce = None
+		self.writeNonce = None
+		self.maxReadLen = None
+		self.maxWriteLen = None
 
 
 	def writeInit(self, maxDataLen, nonce):
 		writeAll(self.fd,
 			struct.pack('!HI', len(nonce), maxDataLen) + nonce
 			)
+		self.readNonce = sha256(nonce + self.key)
+		self.maxReadLen = maxDataLen
 
 
 	def readInit(self):
 		data = readAll(self.fd, 6)
 		hashLen, maxDataLen = struct.unpack('!HI', data)
+		if hashLen != HASHLEN:
+			raise Exception('Received incorrect hash length')
 		nonce = readAll(self.fd, hashLen)
-		return maxDataLen, nonce
+		self.writeNonce = sha256(nonce + self.key)
+		self.maxWriteLen = maxDataLen
 
 
-	def readChunk(self, maxReadLen):
+	def readChunk(self):
 		data = readAll(self.fd, 4)
 		dataLen = struct.unpack('!I', data)[0]
 		if dataLen == 0:
 			raise Exception('Received Error chunk')
-		if dataLen > maxReadLen:
+		if dataLen > self.maxReadLen:
 			raise Exception('More data than allowed')
 		HMAC = readAll(self.fd, HASHLEN)
 		data = readAll(self.fd, dataLen)
-		return HMAC, data
+		expectedHMAC = hmac_sha256(self.key, data + self.readNonce)
+		if not hmac.compare_digest(HMAC, expectedHMAC):
+			raise Exception('Received incorrect HMAC')
+		self.readNonce = incrementNonce(self.readNonce)
+		return data
 
 
 
@@ -106,21 +120,15 @@ class TestServer(unittest.TestCase):
 		self.listenSocket.close()
 
 
-	def test_correctHMACAndData(self):
-		HMACSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+
+	def test_sendsCorrectData(self):
 		try:
+			HMACSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			HMACSocket.connect(('localhost', HMACPORT))
-			protocol = HMACProtocol(HMACSocket)
-
-			maxReadLen = 100
-			readNonce = b'A'*HASHLEN
-			protocol.writeInit(maxDataLen=maxReadLen, nonce=readNonce)
-			readNonce = sha256(readNonce + KEY)
-
-			maxWriteLen, writeNonce = protocol.readInit()
-			self.assertEqual(len(writeNonce), HASHLEN)
-			writeNonce = sha256(writeNonce + KEY)
-
+			protocol = HMACProtocol(HMACSocket, KEY)
+			protocol.writeInit(maxDataLen=100, nonce=b'A'*HASHLEN)
+			protocol.readInit()
 			regularSocket, address = self.listenSocket.accept()
 
 			sentData = b'Foobar'
@@ -129,12 +137,7 @@ class TestServer(unittest.TestCase):
 
 				receiveBuffer = b''
 				while len(receiveBuffer) < len(sentData):
-					HMAC, data = protocol.readChunk(maxReadLen)
-					expectedHMAC = hmac_sha256(KEY, data + readNonce)
-					self.assertTrue(hmac.compare_digest(HMAC, expectedHMAC))
-					receiveBuffer += data
-					readNonce = incrementNonce(readNonce)
-
+					receiveBuffer += protocol.readChunk()
 				self.assertEqual(receiveBuffer, sentData)
 
 		finally:
