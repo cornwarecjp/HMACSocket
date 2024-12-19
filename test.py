@@ -35,7 +35,7 @@ def readAll(fd, size):
 	while size:
 		newData = fd.recv(size)
 		if not newData:
-			raise Exception('Connection has closed')
+			raise EOFError('Connection has closed')
 		ret += newData
 		size -= len(newData)
 	return ret
@@ -89,8 +89,9 @@ class HMACProtocol:
 		return data
 
 
-	def writeChunk(self, data):
-		HMAC = hmac_sha256(self.key, data + self.writeNonce)
+	def writeChunk(self, data, HMAC=None):
+		if HMAC is None:
+			HMAC = hmac_sha256(self.key, data + self.writeNonce)
 		writeAll(self.fd, struct.pack('!I', len(data)) + HMAC + data)
 		self.writeNonce = incrementNonce(self.writeNonce)
 
@@ -166,6 +167,22 @@ class TestServer(unittest.TestCase):
 
 				receivedData = readAll(regularSocket, len(sentData))
 				self.assertEqual(receivedData, sentData)
+
+		finally:
+			HMACSocket.close()
+			regularSocket.close()
+
+
+	def test_rejectsIncorrectHMAC(self):
+		try:
+			HMACSocket, regularSocket, protocol = self.setupSocketPair(
+				maxDataLen=100, nonce=b'A'*HASHLEN)
+
+			sentData = b'Foobar'
+			protocol.writeChunk(sentData, HMAC=b'A'*HASHLEN)
+
+			with self.assertRaises(EOFError):
+				readAll(regularSocket, 1)
 
 		finally:
 			HMACSocket.close()
