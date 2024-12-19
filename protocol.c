@@ -113,7 +113,7 @@ void readInitMessage(int fd, unsigned char *nonce, uint32_t *maxMessageLength)
 	readAll(fd, &hashLength_bigEndian, sizeof(hashLength_bigEndian));
 	if(ntohs(hashLength_bigEndian) != HMACLEN)
 	{
-		perror("Hash length mismatch\n");
+		fprintf(stderr, "Hash length mismatch\n");
 		exit(1);
 	}
 
@@ -190,7 +190,8 @@ void readChunkMessage(int fd,
 	}
 	if(dataLength > MAX_MESSAGE_SIZE)
 	{
-		perror("Received too big data size\n");
+		fprintf(stderr, "Received too big data size\n");
+		//TODO: send back error
 		exit(1);
 	}
 
@@ -205,7 +206,8 @@ void readChunkMessage(int fd,
 		HMACIsCorrect = (HMAC[i] == expectedHMAC[i]) && HMACIsCorrect;
 	if(!HMACIsCorrect)
 	{
-		perror("HMAC comparison failure\n");
+		fprintf(stderr, "HMAC comparison failure\n");
+		//TODO: send back error
 		exit(1);
 	}
 
@@ -237,7 +239,7 @@ void forwardData(int regularfd, int HMACfd, const unsigned char *key, unsigned i
 
 		if(poll(pollList, 2, -1) < 0)
 		{
-			perror("poll error\n");
+			perror("poll error");
 			exit(1);
 		}
 

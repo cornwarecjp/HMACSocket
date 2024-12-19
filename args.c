@@ -78,7 +78,7 @@ int parse_opt(int key, char *arg, struct argp_state *state)
 			}
 			else
 			{
-				perror("Connect port must have the form host:port");
+				fprintf(stderr, "Connect port must have the form host:port");
 				exit(1);
 			}
 		}
@@ -86,17 +86,17 @@ int parse_opt(int key, char *arg, struct argp_state *state)
 	case ARGP_KEY_END:
 		if(arguments->key == NULL)
 		{
-			perror("No key file was specified");
+			fprintf(stderr, "No key file was specified");
 			exit(1);
 		}
 		if(arguments->listenPort < 0)
 		{
-			perror("No listen port was specified");
+			fprintf(stderr, "No listen port was specified");
 			exit(1);
 		}
 		if(arguments->connectPort < 0)
 		{
-			perror("No connect port was specified");
+			fprintf(stderr, "No connect port was specified");
 			exit(1);
 		}
 	}
