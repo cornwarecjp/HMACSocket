@@ -89,6 +89,12 @@ class HMACProtocol:
 		return data
 
 
+	def writeChunk(self, data):
+		HMAC = hmac_sha256(self.key, data + self.writeNonce)
+		writeAll(self.fd, struct.pack('!I', len(data)) + HMAC + data)
+		self.writeNonce = incrementNonce(self.writeNonce)
+
+
 
 class TestServer(unittest.TestCase):
 	def setUp(self):
@@ -120,25 +126,46 @@ class TestServer(unittest.TestCase):
 		self.listenSocket.close()
 
 
+	def setupSocketPair(self, maxDataLen, nonce):
+		HMACSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		HMACSocket.connect(('localhost', HMACPORT))
+		protocol = HMACProtocol(HMACSocket, KEY)
+		protocol.writeInit(maxDataLen, nonce)
+		protocol.readInit()
+		regularSocket, address = self.listenSocket.accept()
+		return HMACSocket, regularSocket, protocol
 
 
 	def test_sendsCorrectData(self):
 		try:
-			HMACSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-			HMACSocket.connect(('localhost', HMACPORT))
-			protocol = HMACProtocol(HMACSocket, KEY)
-			protocol.writeInit(maxDataLen=100, nonce=b'A'*HASHLEN)
-			protocol.readInit()
-			regularSocket, address = self.listenSocket.accept()
+			HMACSocket, regularSocket, protocol = self.setupSocketPair(
+				maxDataLen=100, nonce=b'A'*HASHLEN)
 
 			sentData = b'Foobar'
 			for i in range(10):
 				writeAll(regularSocket, sentData)
 
-				receiveBuffer = b''
-				while len(receiveBuffer) < len(sentData):
-					receiveBuffer += protocol.readChunk()
-				self.assertEqual(receiveBuffer, sentData)
+				receivedData = b''
+				while len(receivedData) < len(sentData):
+					receivedData += protocol.readChunk()
+				self.assertEqual(receivedData, sentData)
+
+		finally:
+			HMACSocket.close()
+			regularSocket.close()
+
+
+	def test_acceptsCorrectHMACAndData(self):
+		try:
+			HMACSocket, regularSocket, protocol = self.setupSocketPair(
+				maxDataLen=100, nonce=b'A'*HASHLEN)
+
+			sentData = b'Foobar'
+			for i in range(10):
+				protocol.writeChunk(sentData)
+
+				receivedData = readAll(regularSocket, len(sentData))
+				self.assertEqual(receivedData, sentData)
 
 		finally:
 			HMACSocket.close()
@@ -147,5 +174,5 @@ class TestServer(unittest.TestCase):
 
 
 if __name__ == '__main__':
-	unittest.main()
+	unittest.main(verbosity=3)
 
