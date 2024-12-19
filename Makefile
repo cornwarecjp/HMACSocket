@@ -1,4 +1,4 @@
-.PHONY: all clean
+.PHONY: all clean test
 
 all: hmacsocketclient hmacsocketserver
 
@@ -11,4 +11,7 @@ hmacsocketclient: client.o hmac.o network.o protocol.o args.o
 
 hmacsocketserver: server.o hmac.o network.o protocol.o args.o
 	gcc -o hmacsocketserver server.o hmac.o network.o protocol.o args.o -lcrypto
+
+test: hmacsocketclient hmacsocketserver
+	./test.py
 
